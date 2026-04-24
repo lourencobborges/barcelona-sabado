@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Sábado · Barcelona</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,700;1,9..144,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+  :root{
+    --ink:#1a1410;
+    --paper:#f2e8d5;
+    --paper-2:#ebdfc6;
+    --terra:#c2502e;
+    --terra-dk:#8b2f16;
+    --sea:#1a5878;
+    --gold:#d4a437;
+    --olive:#7a8547;
+    --line:rgba(26,20,16,0.15);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{overflow-x:hidden}
+  body{
+    font-family:'Fraunces',serif;
+    background:var(--paper);
+    color:var(--ink);
+    min-height:100vh;
+    position:relative;
+  }
+  body::before{
+    content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+    background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 300 300' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0.1 0 0 0 0 0.08 0 0 0 0 0.06 0 0 0 0.5 0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E");
+    opacity:0.4;mix-blend-mode:multiply;
+  }
+
+  .hero{
+    position:relative;
+    padding:36px 22px 28px;
+    text-align:center;
+    z-index:2;
+    overflow:hidden;
+  }
+  .hero-bg{
+    position:absolute;inset:0;z-index:-1;
+    background:
+      radial-gradient(ellipse at 20% 0%, rgba(194,80,46,0.25) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 100%, rgba(26,88,120,0.25) 0%, transparent 50%),
+      linear-gradient(180deg, var(--paper-2) 0%, var(--paper) 100%);
+  }
+  .date-badge{
+    display:inline-block;
+    font-family:'JetBrains Mono',monospace;
+    font-size:10px;
+    letter-spacing:0.25em;
+    text-transform:uppercase;
+    padding:6px 14px;
+    background:var(--ink);
+    color:var(--paper);
+    border-radius:100px;
+    margin-bottom:18px;
+  }
+  h1{
+    font-weight:300;
+    font-size:clamp(44px,11vw,72px);
+    line-height:0.9;
+    letter-spacing:-0.03em;
+    font-variation-settings:"opsz" 144;
+    margin-bottom:8px;
+  }
+  h1 em{font-style:italic;color:var(--terra);font-weight:500}
+  .subtitle{
+    font-style:italic;
+    font-size:16px;
+    opacity:0.7;
+    margin-top:12px;
+    font-weight:300;
+  }
+  .hero-stats{
+    display:flex;
+    justify-content:center;
+    gap:28px;
+    margin-top:24px;
+    padding-top:20px;
+    border-top:1px solid var(--line);
+  }
+  .stat{text-align:center}
+  .stat-num{
+    font-size:22px;
+    font-weight:500;
+    color:var(--terra-dk);
+    font-variation-settings:"opsz" 48;
+  }
+  .stat-lbl{
+    font-family:'JetBrains Mono',monospace;
+    font-size:9px;
+    letter-spacing:0.15em;
+    text-transform:uppercase;
+    opacity:0.6;
+    margin-top:2px;
+  }
+
+  .progress-wrap{
+    position:sticky;
+    top:0;
+    z-index:50;
+    background:rgba(242,232,213,0.96);
+    backdrop-filter:blur(16px);
+    -webkit-backdrop-filter:blur(16px);
+    padding:12px 22px;
+    border-bottom:1px solid var(--line);
+  }
+  .progress-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:8px;
+    font-family:'JetBrains Mono',monospace;
+    font-size:10px;
+    letter-spacing:0.1em;
+  }
+  .progress-now{
+    color:var(--terra-dk);
+    font-weight:600;
+  }
+  .progress-now .dot-live{
+    display:inline-block;
+    width:6px;height:6px;
+    background:var(--terra);
+    border-radius:50%;
+    margin-right:5px;
+    animation:pulse 1.5s infinite;
+  }
+  @keyframes pulse{
+    0%,100%{opacity:1;transform:scale(1)}
+    50%{opacity:0.3;transform:scale(1.4)}
+  }
+  .progress-bar{
+    height:3px;
+    background:var(--line);
+    border-radius:100px;
+    overflow:hidden;
+    position:relative;
+  }
+  .progress-fill{
+    height:100%;
+    background:linear-gradient(90deg, var(--terra), var(--gold));
+    border-radius:100px;
+    width:0%;
+    transition:width 0.6s ease;
+  }
+
+  .map-section{
+    position:relative;
+    margin:0 0 20px;
+    z-index:2;
+  }
+  #map{
+    height:340px;
+    width:100%;
+    background:var(--paper-2);
+    border-top:1px solid var(--line);
+    border-bottom:1px solid var(--line);
+  }
+  .map-legend{
+    position:absolute;
+    bottom:12px;
+    left:12px;
+    background:rgba(26,20,16,0.92);
+    color:var(--paper);
+    padding:10px 14px;
+    border-radius:8px;
+    font-family:'JetBrains Mono',monospace;
+    font-size:10px;
+    line-height:1.8;
+    z-index:400;
+    backdrop-filter:blur(8px);
+  }
+  .map-legend .lg-item{display:flex;align-items:center;gap:8px}
+  .map-legend .lg-dot{width:10px;height:10px;border-radius:50%}
+
+  .marker-pin{
+    position:relative;
+    width:32px;height:32px;
+    display:flex;align-items:center;justify-content:center;
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;
+    font-weight:600;
+    color:var(--paper);
+    background:var(--ink);
+    border-radius:50%;
+    border:2px solid var(--paper);
+    box-shadow:0 4px 12px rgba(0,0,0,0.3);
+    transform:translate(-50%,-50%);
+    transition:all 0.3s ease;
+  }
+  .marker-pin.food{background:var(--terra)}
+  .marker-pin.vibe{background:var(--sea)}
+  .marker-pin.shop{background:var(--olive)}
+  .marker-pin.active{
+    transform:translate(-50%,-50%) scale(1.35);
+    box-shadow:0 6px 24px rgba(194,80,46,0.6);
+    z-index:1000 !important;
+    border-color:var(--gold);
+  }
+
+  .cards{
+    padding:4px 16px 120px;
+    position:relative;
+    z-index:2;
+  }
+  .card{
+    background:#fbf5e8;
+    border:1px solid var(--line);
+    border-radius:14px;
+    margin-bottom:12px;
+    overflow:hidden;
+    position:relative;
+    transition:all 0.35s cubic-bezier(0.2,0.8,0.2,1);
+    box-shadow:0 1px 0 rgba(0,0,0,0.04);
+  }
+  .card.active{
+    box-shadow:0 12px 32px -12px rgba(139,47,22,0.35);
+    border-color:var(--terra);
+    transform:translateY(-2px);
+  }
+  .card.done{opacity:0.55}
+  .card.done .photo{filter:grayscale(0.6) brightness(0.85)}
+
+  .card-head{
+    display:flex;
+    gap:14px;
+    padding:14px;
+    cursor:pointer;
+    position:relative;
+    align-items:center;
+  }
+  .photo{
+    width:72px;height:72px;
+    border-radius:10px;
+    background-size:cover;
+    background-position:center;
+    background-color:var(--paper-2);
+    flex-shrink:0;
+    position:relative;
+    overflow:hidden;
+    box-shadow:inset 0 0 0 1px rgba(0,0,0,0.05);
+  }
+  .photo-num{
+    position:absolute;
+    top:4px;left:4px;
+    width:20px;height:20px;
+    background:var(--ink);
+    color:var(--paper);
+    border-radius:50%;
+    font-family:'JetBrains Mono',monospace;
+    font-size:10px;
+    font-weight:600;
+    display:flex;align-items:center;justify-content:center;
+    z-index:2;
+  }
+  .card.food .photo-num{background:var(--terra)}
+  .card.vibe .photo-num{background:var(--sea)}
+  .card.shop .photo-num{background:var(--olive)}
+
+  .head-info{flex:1;min-width:0}
+  .time-row{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-bottom:4px;
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;
+    flex-wrap:wrap;
+  }
+  .time-chip{
+    color:var(--terra-dk);
+    font-weight:600;
+  }
+  .mode-chip{
+    font-size:9px;
+    letter-spacing:0.15em;
+    text-transform:uppercase;
+    padding:2px 7px;
+    background:var(--paper-2);
+    border:1px solid var(--line);
+    border-radius:100px;
+    opacity:0.75;
+  }
+  .mode-chip.uber{background:var(--ink);color:var(--paper);border-color:var(--ink);opacity:1}
+  .mode-chip.foot{background:var(--olive);color:var(--paper);border-color:var(--olive);opacity:1}
+  .mode-chip.metro{background:var(--sea);color:var(--paper);border-color:var(--sea);opacity:1}
+
+  .place-name{
+    font-size:18px;
+    font-weight:500;
+    line-height:1.1;
+    letter-spacing:-0.01em;
+    font-variation-settings:"opsz" 48;
+    margin-bottom:2px;
+  }
+  .place-zone{
+    font-size:12px;
+    font-style:italic;
+    opacity:0.6;
+  }
+  .chevron{
+    position:absolute;
+    right:14px;top:50%;
+    transform:translateY(-50%);
+    font-size:22px;
+    opacity:0.3;
+    transition:transform 0.3s ease;
+    font-weight:300;
+  }
+  .card.active .chevron{transform:translateY(-50%) rotate(90deg);opacity:1;color:var(--terra)}
+
+  .card-body{
+    max-height:0;
+    overflow:hidden;
+    transition:max-height 0.5s cubic-bezier(0.2,0.8,0.2,1);
+  }
+  .card.active .card-body{max-height:1400px}
+  .body-inner{
+    padding:14px 14px 16px;
+    border-top:1px dashed var(--line);
+  }
+
+  .tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+  .tag{
+    font-family:'JetBrains Mono',monospace;
+    font-size:9.5px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    padding:4px 9px;
+    border-radius:100px;
+    background:var(--paper-2);
+    border:1px solid var(--line);
+  }
+  .tag.hot{background:var(--terra);color:var(--paper);border-color:var(--terra)}
+  .tag.cool{background:var(--sea);color:var(--paper);border-color:var(--sea)}
+  .tag.warn{background:var(--gold);color:var(--ink);border-color:var(--gold)}
+
+  .tip{
+    font-size:14px;
+    line-height:1.55;
+    margin-bottom:12px;
+    font-weight:400;
+  }
+  .tip:last-child{margin-bottom:0}
+  .tip b{
+    color:var(--terra-dk);
+    font-weight:600;
+    font-family:'JetBrains Mono',monospace;
+    font-size:10px;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    display:block;
+    margin-bottom:4px;
+  }
+
+  .actions{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+  .btn{
+    flex:1;
+    min-width:0;
+    font-family:'JetBrains Mono',monospace;
+    font-size:10px;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    padding:11px 12px;
+    text-decoration:none;
+    text-align:center;
+    border-radius:100px;
+    transition:transform 0.15s ease;
+    font-weight:600;
+    border:none;
+    cursor:pointer;
+  }
+  .btn:active{transform:scale(0.97)}
+  .btn-primary{background:var(--terra);color:var(--paper)}
+  .btn-outline{background:transparent;color:var(--ink);border:1px solid var(--ink)}
+
+  .divider{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin:22px 4px 10px;
+    padding:0 4px;
+  }
+  .divider-line{flex:1;height:1px;background:var(--line)}
+  .divider-text{
+    font-family:'JetBrains Mono',monospace;
+    font-size:9.5px;
+    letter-spacing:0.25em;
+    text-transform:uppercase;
+    opacity:0.55;
+  }
+
+  .status-badge{
+    position:absolute;
+    top:10px;right:10px;
+    font-family:'JetBrains Mono',monospace;
+    font-size:8px;
+    letter-spacing:0.15em;
+    text-transform:uppercase;
+    padding:3px 8px;
+    border-radius:100px;
+    background:var(--ink);
+    color:var(--paper);
+    opacity:0;
+    transition:opacity 0.3s ease;
+    z-index:3;
+  }
+  .card.now .status-badge{
+    opacity:1;
+    background:var(--terra);
+    animation:pulse 2s infinite;
+  }
+  .card.done .status-badge{
+    opacity:1;
+    background:var(--olive);
+  }
+
+  footer{
+    text-align:center;
+    padding:40px 20px;
+    opacity:0.5;
+    font-style:italic;
+    font-size:13px;
+    position:relative;
+    z-index:2;
+  }
+  .heart-pop{color:var(--terra);font-style:normal;display:inline-block;animation:beat 1.5s ease-in-out infinite}
+  @keyframes beat{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
+
+  .leaflet-popup-content-wrapper{
+    background:var(--ink);
+    color:var(--paper);
+    border-radius:8px;
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;
+  }
+  .leaflet-popup-content{margin:10px 14px}
+  .leaflet-popup-tip{background:var(--ink)}
+  .leaflet-popup-content b{
+    font-family:'Fraunces',serif;
+    font-size:15px;
+    font-weight:500;
+    display:block;
+    margin-bottom:2px;
+    letter-spacing:-0.01em;
+  }
+  .custom-marker{background:transparent;border:none}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-bg"></div>
+  <div class="date-badge">25 · ABR · SÁBADO</div>
+  <h1>Barcelona,<br><em>meu amor</em></h1>
+  <div class="subtitle">o dia todo, mapeado e otimizado</div>
+  <div class="hero-stats">
+    <div class="stat"><div class="stat-num">10</div><div class="stat-lbl">paradas</div></div>
+    <div class="stat"><div class="stat-num">13h</div><div class="stat-lbl">de dia</div></div>
+    <div class="stat"><div class="stat-num">~6km</div><div class="stat-lbl">a pé</div></div>
+  </div>
+</div>
+
+<div class="progress-wrap">
+  <div class="progress-top">
+    <span class="progress-now"><span class="dot-live"></span><span id="now-txt">começa às 09:00</span></span>
+    <span id="prog-pct">0%</span>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+</div>
+
+<div class="map-section">
+  <div id="map"></div>
+  <div class="map-legend">
+    <div class="lg-item"><span class="lg-dot" style="background:#c2502e"></span>comida</div>
+    <div class="lg-item"><span class="lg-dot" style="background:#1a5878"></span>pontos</div>
+    <div class="lg-item"><span class="lg-dot" style="background:#7a8547"></span>compras</div>
+  </div>
+</div>
+
+<div class="cards" id="cards"></div>
+
+<footer>
+  feito com <span class="heart-pop">♥</span><br>
+  aproveita cada segundo
+</footer>
+
+<script>
+const stops = [
+  {
+    n:1, type:'food',
+    time:'09:00 – 10:00', timeStart:9, timeEnd:10,
+    mode:'a pé', modeClass:'foot',
+    name:'La Papa Lab', zone:'Gran de Gràcia, 127 · Gràcia',
+    lat:41.4016765, lng:2.1529707, emoji:'☕',
+    tags:[{t:'café',c:'hot'},{t:'matcha',c:''},{t:'abre 08:30',c:'warn'}],
+    tips:[
+      {b:'O plano', body:'café da manhã tranquilo antes do metrô. Café Nomad, pastelaria fresca, atendimento ótimo.'},
+      {b:'Matcha obrigatório', body:'era o combinado original do Circl — aqui funciona igual.'},
+      {b:'Saída 10:00', body:'metrô L3 em Fontana, ou desce 10min até Diagonal (L3/L5).'}
+    ],
+    mapsQuery:'LA+PAPA+LAB+Gran+de+Gracia+127+Barcelona'
+  },
+  {
+    n:2, type:'vibe',
+    time:'10:15 – 10:30', timeStart:10.25, timeEnd:10.5,
+    mode:'metrô L3', modeClass:'metro',
+    name:'Plaça de Catalunya', zone:'ponto de partida do Gótico',
+    lat:41.3870154, lng:2.1700471, emoji:'⬜',
+    tags:[{t:'início do gótico',c:'cool'}],
+    tips:[
+      {b:'Descida do metrô', body:'L1/L3. Praça monumental, ponto natural onde começa o Gótico — daqui tudo desce até o mar.'}
+    ],
+    mapsQuery:'Pla%C3%A7a+de+Catalunya+Barcelona'
+  },
+  {
+    n:3, type:'vibe',
+    time:'10:35 – 11:20', timeStart:10.58, timeEnd:11.33,
+    mode:'a pé', modeClass:'foot',
+    name:'Catedral + Pont del Bisbe', zone:'coração do Bairro Gótico',
+    lat:41.383962, lng:2.1761991, emoji:'⛪',
+    tags:[{t:'gótica',c:'cool'},{t:'claustro com gansos',c:''}],
+    tips:[
+      {b:'Catedral', body:'por dentro vale pelo claustro (pátio com palmeiras e gansos). Aberta até 17:15 sáb.'},
+      {b:'Pont del Bisbe', body:'ponte neogótica na Carrer del Bisbe — a mais fotografada do Gótico. Colada na Catedral.'},
+      {b:'Bônus 2min', body:'de lá, caminha 2min até o mural do beijo (El món neix en cada besada) na Pl. d\'Isidre Nonell.'}
+    ],
+    mapsQuery:'Catedral+de+Barcelona'
+  },
+  {
+    n:4, type:'vibe',
+    time:'11:20 – 12:00', timeStart:11.33, timeEnd:12,
+    mode:'a pé', modeClass:'foot',
+    name:'Plaça Reial (via La Rambla)', zone:'fim do Gótico',
+    lat:41.3800821, lng:2.1753507, emoji:'🌴',
+    tags:[{t:'palmeiras',c:''},{t:'lampiões do gaudí',c:'cool'}],
+    tips:[
+      {b:'O caminho', body:'desce a La Rambla (pode atravessar só, é turística) e sai à esquerda pela Pl. Reial.'},
+      {b:'A praça', body:'arcadas amarelas, palmeiras, lampiões desenhados pelo Gaudí jovem. Final perfeito do Gótico.'}
+    ],
+    mapsQuery:'Pla%C3%A7a+Reial+Barcelona'
+  },
+  {
+    n:5, type:'vibe',
+    time:'12:15 – 13:15', timeStart:12.25, timeEnd:13.25,
+    mode:'a pé', modeClass:'foot',
+    name:'El Born', zone:'vermute + lojinhas · 8min da Pl. Reial',
+    lat:41.3847, lng:2.1822, emoji:'🍷',
+    tags:[{t:'vermute',c:'hot'},{t:'design',c:''},{t:'galerias',c:'cool'}],
+    tips:[
+      {b:'O que fazer', body:'vermute no El Xampanyet (Carrer de Montcada, 22) — bar de tapas histórico, só em pé, cava da casa e anchovas.'},
+      {b:'Lojinhas', body:'Carrer del Rec e Passeig del Born têm design independente, concept stores, chocolateria.'},
+      {b:'Santa Maria del Mar', body:'passada por fora, 1min. Basílica gótica linda na Pl. de Santa Maria.'}
+    ],
+    mapsQuery:'El+Xampanyet+Barcelona'
+  },
+  {
+    n:6, type:'vibe',
+    time:'13:15 – 13:45', timeStart:13.25, timeEnd:13.75,
+    mode:'a pé', modeClass:'foot',
+    name:'Parc de la Ciutadella', zone:'passada rápida na Cascada',
+    lat:41.388123, lng:2.1860152, emoji:'⛲',
+    tags:[{t:'grátis',c:''},{t:'30min',c:'cool'}],
+    tips:[
+      {b:'Entra e sai', body:'vai direto na Cascada Monumental (a fonte dourada — Gaudí ajudou quando jovem). Foto, saída pelo sul.'},
+      {b:'No caminho', body:'passa pelo Arc de Triomf e Mercat del Born por fora.'},
+      {b:'Saída até Ca La Nuri', body:'~15min a pé pela Av. del Marquès de l\'Argentera e ponte do porto.'}
+    ],
+    mapsQuery:'Parc+de+la+Ciutadella+Cascada+Monumental'
+  },
+  {
+    n:7, type:'food',
+    time:'14:00 – 15:45', timeStart:14, timeEnd:15.75,
+    mode:'a pé', modeClass:'foot',
+    name:'Ca La Nuri', zone:'Pg. Marítim Barceloneta · pé na areia',
+    lat:41.3829596, lng:2.1949563, emoji:'🥘',
+    tags:[{t:'paella',c:'hot'},{t:'desde 1962',c:''},{t:'praia',c:'cool'}],
+    tips:[
+      {b:'Por que Ca La Nuri e não Xiroi', body:'Xiroi fica 15min a mais de caminhada (Nova Icària). Ca La Nuri é o primeiro trecho da Barceloneta vindo da Ciutadella.'},
+      {b:'O que pedir', body:'arròs negre (arroz negro com lula) ou paella de mariscos. Fazem individual sob pedido.'},
+      {b:'Atenção', body:'terraço tem taxa de 10% extra — mas vale pela vista direto na praia. Família há 60+ anos.'},
+      {b:'Saída 15:45', body:'Uber pro El Corte Inglés, ~12min de carro.'}
+    ],
+    mapsQuery:'Ca+La+Nuri+Barceloneta'
+  },
+  {
+    n:8, type:'shop',
+    time:'16:00 – 17:15', timeStart:16, timeEnd:17.25,
+    mode:'Uber', modeClass:'uber',
+    name:'El Corte Inglés', zone:'Pl. Catalunya, 14 · rooftop',
+    lat:41.3876, lng:2.1701, emoji:'🛍️',
+    tags:[{t:'compras',c:''},{t:'rooftop',c:'cool'}],
+    tips:[
+      {b:'1h15 dá', body:'beleza / gourmet / moda + passada no rooftop (vista 360 da cidade, vale muito).'},
+      {b:'Saída 17:15 cravado', body:'Uber pro Park Güell ~15min. Precisa chegar 17:30 no horário da reserva.'}
+    ],
+    mapsQuery:'El+Corte+Ingles+Plaza+Catalunya'
+  },
+  {
+    n:9, type:'vibe',
+    time:'17:30 – 19:00', timeStart:17.5, timeEnd:19,
+    mode:'Uber', modeClass:'uber',
+    name:'Park Güell', zone:'Gràcia · luz dourada',
+    lat:41.4144948, lng:2.1526945, emoji:'🦎',
+    tags:[{t:'reservado',c:'hot'},{t:'pôr do sol',c:'warn'}],
+    tips:[
+      {b:'Horário perfeito', body:'17:30 em abril = luz dourada começando. Até 19:00 você pega o pôr do sol na zona monumental.'},
+      {b:'~90min', body:'é o tempo exato pra fazer a zona monumental com calma + subir ao mirante.'},
+      {b:'Saída 19:00', body:'Uber pro hotel, banho, trocar. Harry\'s é 22h — tem tempo de sobra.'}
+    ],
+    mapsQuery:'Park+G%C3%BCell+Barcelona'
+  },
+  {
+    n:10, type:'food',
+    time:'22:00', timeStart:22, timeEnd:23.5,
+    mode:'Uber', modeClass:'uber',
+    name:"Harry's", zone:'Passatge de la Concepció, 2 · Eixample',
+    lat:41.3948645, lng:2.1604198, emoji:'🍝',
+    tags:[{t:'italiano',c:'hot'},{t:'tiramisù na mesa',c:''}],
+    tips:[
+      {b:'O clássico', body:'mesmo beco do Tragaluz e Boca Grande. Ambiente lindo, italiano de qualidade.'},
+      {b:'Imperdível', body:'tiramisù feito na mesa — signature da casa.'},
+      {b:'Dica', body:'chega um pouco antes — serviço às vezes demora. Pode instalar no bar enquanto prepara a mesa.'}
+    ],
+    mapsQuery:'Harry%27s+Passatge+de+la+Concepci%C3%B3+Barcelona'
+  }
+];
+
+function emojiPhoto(emoji, type){
+  const colors = {
+    food:['#c2502e','#8b2f16'],
+    vibe:['#1a5878','#0d3a52'],
+    shop:['#7a8547','#545c2f']
+  };
+  const [c1,c2] = colors[type] || colors.vibe;
+  return `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0%25' stop-color='${encodeURIComponent(c1)}'/><stop offset='100%25' stop-color='${encodeURIComponent(c2)}'/></linearGradient></defs><rect width='100' height='100' fill='url(%23g)'/><text x='50' y='62' font-size='44' text-anchor='middle'>${emoji}</text></svg>`;
+}
+
+const cardsEl = document.getElementById('cards');
+const dividers = {
+  1:'☕ manhã · café em gràcia',
+  2:'🏛️ bairro gótico · descendo',
+  5:'🍷 el born & ciutadella',
+  7:'🥘 almoço · barceloneta',
+  8:'🛍️ tarde · compras & gaudí',
+  10:'🌙 noite · jantar'
+};
+
+stops.forEach(s => {
+  if(dividers[s.n]){
+    const d = document.createElement('div');
+    d.className = 'divider';
+    d.innerHTML = `<div class="divider-line"></div><div class="divider-text">${dividers[s.n]}</div><div class="divider-line"></div>`;
+    cardsEl.appendChild(d);
+  }
+  const c = document.createElement('div');
+  c.className = `card ${s.type}`;
+  c.dataset.n = s.n;
+  c.innerHTML = `
+    <div class="status-badge">agora</div>
+    <div class="card-head">
+      <div class="photo" style="background-image:url('${emojiPhoto(s.emoji, s.type)}')">
+        <div class="photo-num">${s.n}</div>
+      </div>
+      <div class="head-info">
+        <div class="time-row">
+          <span class="time-chip">${s.time}</span>
+          <span class="mode-chip ${s.modeClass}">${s.mode}</span>
+        </div>
+        <div class="place-name">${s.name}</div>
+        <div class="place-zone">${s.zone}</div>
+      </div>
+      <div class="chevron">›</div>
+    </div>
+    <div class="card-body">
+      <div class="body-inner">
+        <div class="tags">${s.tags.map(t=>`<span class="tag ${t.c}">${t.t}</span>`).join('')}</div>
+        ${s.tips.map(t=>`<div class="tip"><b>${t.b}</b>${t.body}</div>`).join('')}
+        <div class="actions">
+          <a class="btn btn-primary" href="https://maps.google.com/?q=${s.mapsQuery}" target="_blank">abrir no maps</a>
+          <button class="btn btn-outline" data-focus="${s.n}">ver no mapa</button>
+        </div>
+      </div>
+    </div>
+  `;
+  cardsEl.appendChild(c);
+});
+
+// Card head click handlers
+document.querySelectorAll('.card-head').forEach(head => {
+  head.addEventListener('click', e => {
+    if(e.target.closest('.btn')) return;
+    const card = head.closest('.card');
+    const n = parseInt(card.dataset.n);
+    toggleCard(n);
+  });
+});
+
+// Focus on map button
+document.querySelectorAll('[data-focus]').forEach(btn => {
+  btn.addEventListener('click', e => {
+    e.preventDefault();
+    e.stopPropagation();
+    const n = parseInt(btn.dataset.focus);
+    focusOnMap(n);
+  });
+});
+
+// Map
+const map = L.map('map', {
+  zoomControl: false,
+  attributionControl: false
+}).setView([41.395, 2.175], 13);
+
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+  maxZoom: 19,
+  subdomains: 'abcd'
+}).addTo(map);
+
+L.control.zoom({position: 'topright'}).addTo(map);
+
+const markers = {};
+stops.forEach(s => {
+  const icon = L.divIcon({
+    html: `<div class="marker-pin ${s.type}" data-pin="${s.n}">${s.n}</div>`,
+    className: 'custom-marker',
+    iconSize: [32,32],
+    iconAnchor: [16,16]
+  });
+  const m = L.marker([s.lat, s.lng], {icon}).addTo(map);
+  m.bindPopup(`<b>${s.name}</b>${s.time}`);
+  m.on('click', () => {
+    toggleCard(s.n);
+    setTimeout(() => {
+      document.querySelector(`.card[data-n="${s.n}"]`).scrollIntoView({behavior:'smooth', block:'center'});
+    }, 200);
+  });
+  markers[s.n] = m;
+});
+
+// Route line
+L.polyline(stops.map(s => [s.lat, s.lng]), {
+  color: '#c2502e',
+  weight: 3,
+  opacity: 0.55,
+  dashArray: '8,8'
+}).addTo(map);
+
+const group = L.featureGroup(Object.values(markers));
+map.fitBounds(group.getBounds().pad(0.15));
+
+function toggleCard(n){
+  const card = document.querySelector(`.card[data-n="${n}"]`);
+  const wasActive = card.classList.contains('active');
+  document.querySelectorAll('.card.active').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.marker-pin.active').forEach(p => p.classList.remove('active'));
+  if(!wasActive){
+    card.classList.add('active');
+    const pin = document.querySelector(`.marker-pin[data-pin="${n}"]`);
+    if(pin) pin.classList.add('active');
+  }
+}
+
+function focusOnMap(n){
+  const s = stops.find(x => x.n === n);
+  map.flyTo([s.lat, s.lng], 16, {duration: 1});
+  markers[n].openPopup();
+  document.getElementById('map').scrollIntoView({behavior:'smooth', block:'center'});
+  // highlight pin
+  document.querySelectorAll('.marker-pin.active').forEach(p => p.classList.remove('active'));
+  setTimeout(() => {
+    const pin = document.querySelector(`.marker-pin[data-pin="${n}"]`);
+    if(pin) pin.classList.add('active');
+  }, 600);
+}
+
+function updateProgress(){
+  const now = new Date();
+  const h = now.getHours() + now.getMinutes()/60;
+  const dayStart = 9, dayEnd = 23.5;
+
+  let pct = 0;
+  let currentStop = null;
+  let nextStop = null;
+
+  if(h < dayStart){
+    pct = 0;
+    nextStop = stops[0];
+  } else if(h > dayEnd){
+    pct = 100;
+  } else {
+    pct = Math.round(((h - dayStart) / (dayEnd - dayStart)) * 100);
+    for(let i = 0; i < stops.length; i++){
+      if(h >= stops[i].timeStart && h < stops[i].timeEnd){
+        currentStop = stops[i];
+        break;
+      }
+      if(h < stops[i].timeStart){
+        nextStop = stops[i];
+        break;
+      }
+    }
+  }
+
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('prog-pct').textContent = pct + '%';
+
+  const txt = currentStop ? `agora · ${currentStop.name}` :
+              nextStop ? `próx · ${nextStop.time.split(' – ')[0]} · ${nextStop.name}` :
+              pct === 100 ? 'dia completo ♥' : `começa às 09:00`;
+  document.getElementById('now-txt').textContent = txt;
+
+  document.querySelectorAll('.card').forEach(c => {
+    c.classList.remove('now','done');
+    const n = parseInt(c.dataset.n);
+    const s = stops.find(x => x.n === n);
+    if(currentStop && s.n === currentStop.n){
+      c.classList.add('now');
+    } else if(h >= s.timeEnd){
+      c.classList.add('done');
+    }
+  });
+}
+
+updateProgress();
+setInterval(updateProgress, 60000);
+
+// Open first card
+setTimeout(() => toggleCard(1), 500);
+</script>
+</body>
+</html>
