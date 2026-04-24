@@ -227,7 +227,6 @@
     transform:translateY(-2px);
   }
   .card.done{opacity:0.55}
-  .card.done .photo{filter:grayscale(0.6) brightness(0.85)}
 
   .card-head{
     display:flex;
@@ -237,20 +236,9 @@
     position:relative;
     align-items:center;
   }
-  .photo{
-    width:72px;height:72px;
-    border-radius:10px;
-    background-size:cover;
-    background-position:center;
-    background-color:var(--paper-2);
-    flex-shrink:0;
-    position:relative;
-    overflow:hidden;
-    box-shadow:inset 0 0 0 1px rgba(0,0,0,0.05);
-  }
-  .photo-num{
-    position:absolute;
-    top:4px;left:4px;
+  .num-chip{
+    display:inline-flex;
+    align-items:center;justify-content:center;
     width:20px;height:20px;
     background:var(--ink);
     color:var(--paper);
@@ -258,12 +246,40 @@
     font-family:'JetBrains Mono',monospace;
     font-size:10px;
     font-weight:600;
-    display:flex;align-items:center;justify-content:center;
-    z-index:2;
+    flex-shrink:0;
   }
-  .card.food .photo-num{background:var(--terra)}
-  .card.vibe .photo-num{background:var(--sea)}
-  .card.shop .photo-num{background:var(--olive)}
+  .card.food .num-chip{background:var(--terra)}
+  .card.vibe .num-chip{background:var(--sea)}
+  .card.shop .num-chip{background:var(--olive)}
+
+  .transit{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:4px 8px;
+    margin:-4px 0 -2px;
+  }
+  .transit-line{
+    flex:1;
+    height:1px;
+    background:var(--line);
+    opacity:0.5;
+  }
+  .transit-pill{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    font-size:11px;
+    font-family:'JetBrains Mono',monospace;
+    color:rgba(26,20,16,0.7);
+    background:var(--paper-2);
+    padding:5px 11px;
+    border-radius:999px;
+    white-space:nowrap;
+    letter-spacing:0.02em;
+    border:1px solid var(--line);
+  }
+  .transit-icon{font-size:13px;line-height:1}
 
   .head-info{flex:1;min-width:0}
   .time-row{
@@ -515,6 +531,7 @@ const stops = [
     mode:'metrô L3', modeClass:'metro',
     name:'Plaça de Catalunya', zone:'ponto de partida do Gótico',
     lat:41.3870154, lng:2.1700471, emoji:'⬜',
+    fromPrev:{icon:'🚇', txt:'~10 min · L3 Fontana → Catalunya'},
     tags:[{t:'início do gótico',c:'cool'}],
     tips:[
       {b:'Descida do metrô', body:'L1/L3. Praça monumental, ponto natural onde começa o Gótico — daqui tudo desce até o mar.'}
@@ -527,6 +544,7 @@ const stops = [
     mode:'a pé', modeClass:'foot',
     name:'Catedral + Pont del Bisbe', zone:'coração do Bairro Gótico',
     lat:41.383962, lng:2.1761991, emoji:'⛪',
+    fromPrev:{icon:'🚶', txt:'8 min · Portal de l\'Àngel'},
     tags:[{t:'gótica',c:'cool'},{t:'claustro com gansos',c:''}],
     tips:[
       {b:'Catedral', body:'por dentro vale pelo claustro (pátio com palmeiras e gansos). Aberta até 17:15 sáb.'},
@@ -541,6 +559,7 @@ const stops = [
     mode:'a pé', modeClass:'foot',
     name:'Plaça Reial (via La Rambla)', zone:'fim do Gótico',
     lat:41.3800821, lng:2.1753507, emoji:'🌴',
+    fromPrev:{icon:'🚶', txt:'6 min · descendo La Rambla'},
     tags:[{t:'palmeiras',c:''},{t:'lampiões do gaudí',c:'cool'}],
     tips:[
       {b:'O caminho', body:'desce a La Rambla (pode atravessar só, é turística) e sai à esquerda pela Pl. Reial.'},
@@ -552,8 +571,9 @@ const stops = [
     n:5, type:'vibe',
     time:'12:15 – 13:15', timeStart:12.25, timeEnd:13.25,
     mode:'a pé', modeClass:'foot',
-    name:'El Born', zone:'vermute + lojinhas · 8min da Pl. Reial',
+    name:'El Born', zone:'vermute + lojinhas',
     lat:41.3847, lng:2.1822, emoji:'🍷',
+    fromPrev:{icon:'🚶', txt:'10 min · Ferran + Via Laietana'},
     tags:[{t:'vermute',c:'hot'},{t:'design',c:''},{t:'galerias',c:'cool'}],
     tips:[
       {b:'O que fazer', body:'vermute no El Xampanyet (Carrer de Montcada, 22) — bar de tapas histórico, só em pé, cava da casa e anchovas.'},
@@ -568,6 +588,7 @@ const stops = [
     mode:'a pé', modeClass:'foot',
     name:'Parc de la Ciutadella', zone:'passada rápida na Cascada',
     lat:41.388123, lng:2.1860152, emoji:'⛲',
+    fromPrev:{icon:'🚶', txt:'7 min · subindo Princesa'},
     tags:[{t:'grátis',c:''},{t:'30min',c:'cool'}],
     tips:[
       {b:'Entra e sai', body:'vai direto na Cascada Monumental (a fonte dourada — Gaudí ajudou quando jovem). Foto, saída pelo sul.'},
@@ -582,6 +603,7 @@ const stops = [
     mode:'a pé', modeClass:'foot',
     name:'Ca La Nuri', zone:'Pg. Marítim Barceloneta · pé na areia',
     lat:41.3829596, lng:2.1949563, emoji:'🥘',
+    fromPrev:{icon:'🚶', txt:'13 min · Pg. Picasso + ponte do porto'},
     tags:[{t:'paella',c:'hot'},{t:'desde 1962',c:''},{t:'praia',c:'cool'}],
     tips:[
       {b:'Por que Ca La Nuri e não Xiroi', body:'Xiroi fica 15min a mais de caminhada (Nova Icària). Ca La Nuri é o primeiro trecho da Barceloneta vindo da Ciutadella.'},
@@ -597,6 +619,7 @@ const stops = [
     mode:'Uber', modeClass:'uber',
     name:'El Corte Inglés', zone:'Pl. Catalunya, 14 · rooftop',
     lat:41.3876, lng:2.1701, emoji:'🛍️',
+    fromPrev:{icon:'🚗', txt:'~12 min · Uber da Barceloneta'},
     tags:[{t:'compras',c:''},{t:'rooftop',c:'cool'}],
     tips:[
       {b:'1h15 dá', body:'beleza / gourmet / moda + passada no rooftop (vista 360 da cidade, vale muito).'},
@@ -610,6 +633,7 @@ const stops = [
     mode:'Uber', modeClass:'uber',
     name:'Park Güell', zone:'Gràcia · luz dourada',
     lat:41.4144948, lng:2.1526945, emoji:'🦎',
+    fromPrev:{icon:'🚗', txt:'~15 min · Uber (sai às 17:15 cravado)'},
     tags:[{t:'reservado',c:'hot'},{t:'pôr do sol',c:'warn'}],
     tips:[
       {b:'Horário perfeito', body:'17:30 em abril = luz dourada começando. Até 19:00 você pega o pôr do sol na zona monumental.'},
@@ -624,6 +648,7 @@ const stops = [
     mode:'Uber', modeClass:'uber',
     name:"Harry's", zone:'Passatge de la Concepció, 2 · Eixample',
     lat:41.3948645, lng:2.1604198, emoji:'🍝',
+    fromPrev:{icon:'🚗', txt:'Uber · passa no hotel antes (banho + troca)'},
     tags:[{t:'italiano',c:'hot'},{t:'tiramisù na mesa',c:''}],
     tips:[
       {b:'O clássico', body:'mesmo beco do Tragaluz e Boca Grande. Ambiente lindo, italiano de qualidade.'},
@@ -633,16 +658,6 @@ const stops = [
     mapsQuery:'Harry%27s+Passatge+de+la+Concepci%C3%B3+Barcelona'
   }
 ];
-
-function emojiPhoto(emoji, type){
-  const colors = {
-    food:['#c2502e','#8b2f16'],
-    vibe:['#1a5878','#0d3a52'],
-    shop:['#7a8547','#545c2f']
-  };
-  const [c1,c2] = colors[type] || colors.vibe;
-  return `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0%25' stop-color='${encodeURIComponent(c1)}'/><stop offset='100%25' stop-color='${encodeURIComponent(c2)}'/></linearGradient></defs><rect width='100' height='100' fill='url(%23g)'/><text x='50' y='62' font-size='44' text-anchor='middle'>${emoji}</text></svg>`;
-}
 
 const cardsEl = document.getElementById('cards');
 const dividers = {
@@ -654,7 +669,13 @@ const dividers = {
   10:'🌙 noite · jantar'
 };
 
-stops.forEach(s => {
+stops.forEach((s, idx) => {
+  if(idx > 0 && s.fromPrev){
+    const t = document.createElement('div');
+    t.className = 'transit';
+    t.innerHTML = `<div class="transit-line"></div><div class="transit-pill"><span class="transit-icon">${s.fromPrev.icon}</span><span class="transit-txt">${s.fromPrev.txt}</span></div><div class="transit-line"></div>`;
+    cardsEl.appendChild(t);
+  }
   if(dividers[s.n]){
     const d = document.createElement('div');
     d.className = 'divider';
@@ -667,11 +688,9 @@ stops.forEach(s => {
   c.innerHTML = `
     <div class="status-badge">agora</div>
     <div class="card-head">
-      <div class="photo" style="background-image:url('${emojiPhoto(s.emoji, s.type)}')">
-        <div class="photo-num">${s.n}</div>
-      </div>
       <div class="head-info">
         <div class="time-row">
+          <span class="num-chip">${s.n}</span>
           <span class="time-chip">${s.time}</span>
           <span class="mode-chip ${s.modeClass}">${s.mode}</span>
         </div>
