@@ -479,7 +479,7 @@
   <h1>Barcelona</h1>
   <div class="subtitle">o dia todo, mapeado e otimizado</div>
   <div class="hero-stats">
-    <div class="stat"><div class="stat-num">10</div><div class="stat-lbl">paradas</div></div>
+    <div class="stat"><div class="stat-num">11</div><div class="stat-lbl">paradas</div></div>
     <div class="stat"><div class="stat-num">13h</div><div class="stat-lbl">de dia</div></div>
     <div class="stat"><div class="stat-num">~6km</div><div class="stat-lbl">a pé</div></div>
   </div>
@@ -513,97 +513,113 @@
 const stops = [
   {
     n:1, type:'food',
-    time:'09:00 – 10:00', timeStart:9, timeEnd:10,
+    time:'09:00 – 09:30', timeStart:9, timeEnd:9.5,
     mode:'a pé', modeClass:'foot',
     name:'La Papa Lab', zone:'Gran de Gràcia, 127 · Gràcia',
     lat:41.4016765, lng:2.1529707, emoji:'☕',
-    tags:[{t:'café',c:'hot'},{t:'matcha',c:''},{t:'abre 08:30',c:'warn'}],
+    tags:[{t:'café rápido',c:'hot'},{t:'matcha',c:''},{t:'abre 08:30',c:'warn'}],
     tips:[
-      {b:'O plano', body:'café da manhã tranquilo antes do metrô. Café Nomad, pastelaria fresca, atendimento ótimo.'},
+      {b:'30 min cravados', body:'objetivo é chegar no Palau às 10h. Nomad, matcha, pastelaria — pede rápido.'},
       {b:'Matcha obrigatório', body:'era o combinado original do Circl — aqui funciona igual.'},
-      {b:'Saída 10:00', body:'metrô L3 em Fontana, ou desce 10min até Diagonal (L3/L5).'}
+      {b:'Saída 09:30', body:'metrô Fontana L3 → transfere em Passeig de Gràcia pra L4 → desce em Urquinaona. ~15min metrô + 5min a pé.'}
     ],
     mapsQuery:'LA+PAPA+LAB+Gran+de+Gracia+127+Barcelona'
   },
   {
     n:2, type:'vibe',
-    time:'10:15 – 10:30', timeStart:10.25, timeEnd:10.5,
-    mode:'metrô L3', modeClass:'metro',
-    name:'Plaça de Catalunya', zone:'ponto de partida do Gótico',
-    lat:41.3870154, lng:2.1700471, emoji:'⬜',
-    fromPrev:{icon:'🚇', txt:'~10 min · L3 Fontana → Catalunya'},
-    tags:[{t:'início do gótico',c:'cool'}],
+    time:'10:00 – 11:00', timeStart:10, timeEnd:11,
+    mode:'metrô L3+L4', modeClass:'metro',
+    name:'Palau de la Música', zone:'C/ Palau de la Música, 4-6 · Ribera',
+    lat:41.3876, lng:2.17527, emoji:'🎼',
+    fromPrev:{icon:'🚇', txt:'~20 min · L3 Fontana → L4 Urquinaona'},
+    tags:[{t:'reservado',c:'hot'},{t:'tour 55min',c:''},{t:'art nouveau',c:'cool'}],
     tips:[
-      {b:'Descida do metrô', body:'L1/L3. Praça monumental, ponto natural onde começa o Gótico — daqui tudo desce até o mar.'}
+      {b:'Ingresso', body:'€20 já reservado em palaumusica.cat — abre o voucher no celular antes de entrar.'},
+      {b:'O tour', body:'55min guiado. O vitral central do teto é o ponto alto — não esquece de olhar pra cima.'},
+      {b:'Localização perfeita', body:'fica entre o Gótico e o Born. Saindo já emenda direto no Gótico — 5min a pé até Plaça de Catalunya.'}
+    ],
+    mapsQuery:'Palau+de+la+Musica+Catalana+Barcelona'
+  },
+  {
+    n:3, type:'vibe',
+    time:'11:10 – 11:20', timeStart:11.17, timeEnd:11.33,
+    mode:'a pé', modeClass:'foot',
+    name:'Plaça de Catalunya', zone:'início do Gótico + topo da Rambla',
+    lat:41.3870154, lng:2.1700471, emoji:'⬜',
+    fromPrev:{icon:'🚶', txt:'5 min · Via Laietana + Ronda Sant Pere'},
+    tags:[{t:'passada rápida',c:''},{t:'topo da rambla',c:'cool'}],
+    tips:[
+      {b:'Só passagem', body:'10min pra registrar. Praça monumental, ponto natural onde começa o Gótico — daqui tudo desce até o mar.'},
+      {b:'Entra no Gótico', body:'sai pela Portal de l\'Àngel (rua pedestre cheia de loja) — leva direto à Catedral.'}
     ],
     mapsQuery:'Pla%C3%A7a+de+Catalunya+Barcelona'
   },
   {
-    n:3, type:'vibe',
-    time:'10:35 – 11:20', timeStart:10.58, timeEnd:11.33,
+    n:4, type:'vibe',
+    time:'11:25 – 12:15', timeStart:11.42, timeEnd:12.25,
     mode:'a pé', modeClass:'foot',
     name:'Catedral + Pont del Bisbe', zone:'coração do Bairro Gótico',
     lat:41.383962, lng:2.1761991, emoji:'⛪',
-    fromPrev:{icon:'🚶', txt:'8 min · Portal de l\'Àngel'},
-    tags:[{t:'gótica',c:'cool'},{t:'claustro com gansos',c:''}],
+    fromPrev:{icon:'🚶', txt:'5 min · Portal de l\'Àngel'},
+    tags:[{t:'gótica',c:'cool'},{t:'claustro com gansos',c:''},{t:'mural do beijo',c:'hot'}],
     tips:[
       {b:'Catedral', body:'por dentro vale pelo claustro (pátio com palmeiras e gansos). Aberta até 17:15 sáb.'},
       {b:'Pont del Bisbe', body:'ponte neogótica na Carrer del Bisbe — a mais fotografada do Gótico. Colada na Catedral.'},
-      {b:'Bônus 2min', body:'de lá, caminha 2min até o mural do beijo (El món neix en cada besada) na Pl. d\'Isidre Nonell.'}
+      {b:'Mural do beijo', body:'2min daqui, na Pl. d\'Isidre Nonell: El món neix en cada besada — mural feito de 4.000 fotos de beijos.'}
     ],
     mapsQuery:'Catedral+de+Barcelona'
   },
   {
-    n:4, type:'vibe',
-    time:'11:20 – 12:00', timeStart:11.33, timeEnd:12,
+    n:5, type:'vibe',
+    time:'12:20 – 12:45', timeStart:12.33, timeEnd:12.75,
     mode:'a pé', modeClass:'foot',
     name:'Plaça Reial (via La Rambla)', zone:'fim do Gótico',
     lat:41.3800821, lng:2.1753507, emoji:'🌴',
-    fromPrev:{icon:'🚶', txt:'6 min · descendo La Rambla'},
+    fromPrev:{icon:'🚶', txt:'5 min · descendo pela Rambla'},
     tags:[{t:'palmeiras',c:''},{t:'lampiões do gaudí',c:'cool'}],
     tips:[
-      {b:'O caminho', body:'desce a La Rambla (pode atravessar só, é turística) e sai à esquerda pela Pl. Reial.'},
+      {b:'O caminho', body:'sai da Catedral, entra na Rambla e desce. Só atravessar a avenida — não precisa parar em nada.'},
       {b:'A praça', body:'arcadas amarelas, palmeiras, lampiões desenhados pelo Gaudí jovem. Final perfeito do Gótico.'}
     ],
     mapsQuery:'Pla%C3%A7a+Reial+Barcelona'
   },
   {
-    n:5, type:'vibe',
-    time:'12:15 – 13:15', timeStart:12.25, timeEnd:13.25,
+    n:6, type:'vibe',
+    time:'12:55 – 13:25', timeStart:12.92, timeEnd:13.42,
     mode:'a pé', modeClass:'foot',
-    name:'El Born', zone:'vermute + lojinhas',
+    name:'El Born', zone:'vermute no Xampanyet + Carrer del Rec',
     lat:41.3847, lng:2.1822, emoji:'🍷',
     fromPrev:{icon:'🚶', txt:'10 min · Ferran + Via Laietana'},
-    tags:[{t:'vermute',c:'hot'},{t:'design',c:''},{t:'galerias',c:'cool'}],
+    tags:[{t:'vermute',c:'hot'},{t:'design',c:''},{t:'rápido',c:'warn'}],
     tips:[
-      {b:'O que fazer', body:'vermute no El Xampanyet (Carrer de Montcada, 22) — bar de tapas histórico, só em pé, cava da casa e anchovas.'},
-      {b:'Lojinhas', body:'Carrer del Rec e Passeig del Born têm design independente, concept stores, chocolateria.'},
-      {b:'Santa Maria del Mar', body:'passada por fora, 1min. Basílica gótica linda na Pl. de Santa Maria.'}
+      {b:'Vermute', body:'El Xampanyet (Carrer de Montcada, 22) — bar de tapas histórico, só em pé, cava da casa e anchovas. 20min bastam.'},
+      {b:'Lojinhas', body:'Carrer del Rec e Passeig del Born têm design independente e concept stores. Passada rápida só.'},
+      {b:'Santa Maria del Mar', body:'por fora, 1min no caminho. Basílica gótica linda na Pl. de Santa Maria.'}
     ],
     mapsQuery:'El+Xampanyet+Barcelona'
   },
   {
-    n:6, type:'vibe',
-    time:'13:15 – 13:45', timeStart:13.25, timeEnd:13.75,
+    n:7, type:'vibe',
+    time:'13:30 – 13:45', timeStart:13.5, timeEnd:13.75,
     mode:'a pé', modeClass:'foot',
-    name:'Parc de la Ciutadella', zone:'passada rápida na Cascada',
+    name:'Parc de la Ciutadella', zone:'só a Cascada · 15min',
     lat:41.388123, lng:2.1860152, emoji:'⛲',
-    fromPrev:{icon:'🚶', txt:'7 min · subindo Princesa'},
-    tags:[{t:'grátis',c:''},{t:'30min',c:'cool'}],
+    fromPrev:{icon:'🚶', txt:'5 min · subindo Princesa'},
+    tags:[{t:'grátis',c:''},{t:'15min',c:'cool'}],
     tips:[
       {b:'Entra e sai', body:'vai direto na Cascada Monumental (a fonte dourada — Gaudí ajudou quando jovem). Foto, saída pelo sul.'},
-      {b:'No caminho', body:'passa pelo Arc de Triomf e Mercat del Born por fora.'},
-      {b:'Saída até Ca La Nuri', body:'~15min a pé pela Av. del Marquès de l\'Argentera e ponte do porto.'}
+      {b:'Arc de Triomf', body:'passa por fora no caminho — não perde tempo entrando.'},
+      {b:'Saída 13:45', body:'~15min a pé pela Av. del Marquès de l\'Argentera e ponte do porto até Ca La Nuri.'}
     ],
     mapsQuery:'Parc+de+la+Ciutadella+Cascada+Monumental'
   },
   {
-    n:7, type:'food',
+    n:8, type:'food',
     time:'14:00 – 15:45', timeStart:14, timeEnd:15.75,
     mode:'a pé', modeClass:'foot',
     name:'Ca La Nuri', zone:'Pg. Marítim Barceloneta · pé na areia',
     lat:41.3829596, lng:2.1949563, emoji:'🥘',
-    fromPrev:{icon:'🚶', txt:'13 min · Pg. Picasso + ponte do porto'},
+    fromPrev:{icon:'🚶', txt:'15 min · Pg. Picasso + ponte do porto'},
     tags:[{t:'paella',c:'hot'},{t:'desde 1962',c:''},{t:'praia',c:'cool'}],
     tips:[
       {b:'Por que Ca La Nuri e não Xiroi', body:'Xiroi fica 15min a mais de caminhada (Nova Icària). Ca La Nuri é o primeiro trecho da Barceloneta vindo da Ciutadella.'},
@@ -614,7 +630,7 @@ const stops = [
     mapsQuery:'Ca+La+Nuri+Barceloneta'
   },
   {
-    n:8, type:'shop',
+    n:9, type:'shop',
     time:'16:00 – 17:15', timeStart:16, timeEnd:17.25,
     mode:'Uber', modeClass:'uber',
     name:'El Corte Inglés', zone:'Pl. Catalunya, 14 · rooftop',
@@ -628,7 +644,7 @@ const stops = [
     mapsQuery:'El+Corte+Ingles+Plaza+Catalunya'
   },
   {
-    n:9, type:'vibe',
+    n:10, type:'vibe',
     time:'17:30 – 19:00', timeStart:17.5, timeEnd:19,
     mode:'Uber', modeClass:'uber',
     name:'Park Güell', zone:'Gràcia · luz dourada',
@@ -643,7 +659,7 @@ const stops = [
     mapsQuery:'Park+G%C3%BCell+Barcelona'
   },
   {
-    n:10, type:'food',
+    n:11, type:'food',
     time:'22:00', timeStart:22, timeEnd:23.5,
     mode:'Uber', modeClass:'uber',
     name:"Harry's", zone:'Passatge de la Concepció, 2 · Eixample',
@@ -662,11 +678,11 @@ const stops = [
 const cardsEl = document.getElementById('cards');
 const dividers = {
   1:'☕ manhã · café em gràcia',
-  2:'🏛️ bairro gótico · descendo',
-  5:'🍷 el born & ciutadella',
-  7:'🥘 almoço · barceloneta',
-  8:'🛍️ tarde · compras & gaudí',
-  10:'🌙 noite · jantar'
+  2:'🏛️ palau + bairro gótico',
+  6:'🍷 el born & ciutadella',
+  8:'🥘 almoço · barceloneta',
+  9:'🛍️ tarde · compras & gaudí',
+  11:'🌙 noite · jantar'
 };
 
 stops.forEach((s, idx) => {
